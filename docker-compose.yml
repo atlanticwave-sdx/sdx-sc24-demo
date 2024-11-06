@@ -1,0 +1,410 @@
+services:
+  mongo:
+    image: mongo:7.0
+    pull_policy: always
+    env_file:
+      - .env
+    healthcheck:
+      test: mongosh --quiet "mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@127.0.0.1:27017/?authSource=admin" --eval 'db.runCommand("ping").ok'
+      interval: 5s
+      timeout: 5s
+      retries: 60
+  mq1:
+    image: rabbitmq:latest
+    pull_policy: always
+    env_file:
+      - .env
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 5s
+      retries: 60
+  amlight:
+    image: amlight/kytos-sdx:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/amlight.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        rsyslogd
+        kytosd --database mongodb
+        tail -f /dev/null
+  sax:
+    image: amlight/kytos-sdx:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/sax.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        rsyslogd
+        kytosd --database mongodb
+        tail -f /dev/null
+  tenet:
+    image: amlight/kytos-sdx:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/tenet.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        rsyslogd
+        kytosd --database mongodb
+        tail -f /dev/null
+  esnet:
+    image: amlight/kytos-sdx:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/esnet.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        rsyslogd
+        kytosd --database mongodb
+        tail -f /dev/null
+  internet2:
+    image: amlight/kytos-sdx:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/internet2.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        rsyslogd
+        kytosd --database mongodb
+        tail -f /dev/null
+  geant_london:
+    image: amlight/kytos-sdx:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/geant_london.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        rsyslogd
+        kytosd --database mongodb
+        tail -f /dev/null
+  geant_france:
+    image: amlight/kytos-sdx:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/geant_france.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        rsyslogd
+        kytosd --database mongodb
+        tail -f /dev/null
+  lhc:
+    image: amlight/kytos-sdx:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/lhc.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        rsyslogd
+        kytosd --database mongodb
+        tail -f /dev/null
+  sax-lc:
+    image: awsdx/sdx-lc:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/sax-lc.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+      mq1:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        python3 /sc24-demo/wait-rabbit.py
+        python3 -m uvicorn sdx_lc.app:asgi_app --host 0.0.0.0 --port 8080
+    command: [""]
+  tenet-lc:
+    image: awsdx/sdx-lc:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/tenet-lc.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+      mq1:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        python3 /sc24-demo/wait-rabbit.py
+        python3 -m uvicorn sdx_lc.app:asgi_app --host 0.0.0.0 --port 8080
+    command: [""]
+  amlight-lc:
+    image: awsdx/sdx-lc:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/amlight-lc.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+      mq1:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        python3 /sc24-demo/wait-rabbit.py
+        python3 -m uvicorn sdx_lc.app:asgi_app --host 0.0.0.0 --port 8080
+    command: [""]
+  esnet-lc:
+    image: awsdx/sdx-lc:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/esnet-lc.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+      mq1:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        python3 /sc24-demo/wait-rabbit.py
+        python3 -m uvicorn sdx_lc.app:asgi_app --host 0.0.0.0 --port 8080
+    command: [""]
+  internet2-lc:
+    image: awsdx/sdx-lc:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/internet2-lc.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+      mq1:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        python3 /sc24-demo/wait-rabbit.py
+        python3 -m uvicorn sdx_lc.app:asgi_app --host 0.0.0.0 --port 8080
+    command: [""]
+  geant_london-lc:
+    image: awsdx/sdx-lc:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/geant_london-lc.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+      mq1:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        python3 /sc24-demo/wait-rabbit.py
+        python3 -m uvicorn sdx_lc.app:asgi_app --host 0.0.0.0 --port 8080
+    command: [""]
+  geant_france-lc:
+    image: awsdx/sdx-lc:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/geant_france-lc.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+      mq1:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        python3 /sc24-demo/wait-rabbit.py
+        python3 -m uvicorn sdx_lc.app:asgi_app --host 0.0.0.0 --port 8080
+    command: [""]
+  lhc-lc:
+    image: awsdx/sdx-lc:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/lhc-lc.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+      mq1:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        python3 /sc24-demo/wait-rabbit.py
+        python3 -m uvicorn sdx_lc.app:asgi_app --host 0.0.0.0 --port 8080
+    command: [""]
+  sdx-controller:
+    image: awsdx/sdx-controller:latest
+    pull_policy: always
+    env_file:
+      - .env
+      - env/sdx-controller.env
+    depends_on:
+      mongo:
+        condition: service_healthy
+      mq1:
+        condition: service_healthy
+    volumes:
+      - .:/sc24-demo
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        # actual steps to setup the service
+        python3 /sc24-demo/setup-mongo-auth.py
+        python3 /sc24-demo/wait-rabbit.py
+        python3 -m uvicorn sdx_controller.app:asgi_app --host 0.0.0.0 --port 8080
+    command: [""]
+  mininet:
+    image: italovalcy/mininet:latest
+    pull_policy: always
+    privileged: true
+    volumes:
+      - ./topology.py:/topology.py
+    entrypoint:
+      - "/bin/bash"
+      - "-x"
+      - "-c"
+      - |
+        service openvswitch-switch start
+        tmux new-session -d -s mn python3 /topology.py
+        tail -f /dev/null
