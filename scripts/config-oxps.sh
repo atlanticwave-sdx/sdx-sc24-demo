@@ -31,8 +31,8 @@ curl -H 'Content-type: application/json' -X POST http://sax:8181/api/kytos/topol
 curl -H 'Content-type: application/json' -X POST http://tenet:8181/api/kytos/topology/v3/switches/00:00:00:00:00:00:00:03/metadata -d '{"lat": "-33.0", "lng": "18.0", "address": "Cape Town, South Africa", "iso3166_2_lvl4": "ZA-WC"}'
 curl -H 'Content-type: application/json' -X POST http://internet2:8181/api/kytos/topology/v3/switches/00:00:00:00:00:00:00:04/metadata -d '{"lat": "38.0", "lng": "-77.0", "address": "Washington DC, USA", "iso3166_2_lvl4": "US-DC"}'
 curl -H 'Content-type: application/json' -X POST http://esnet:8181/api/kytos/topology/v3/switches/00:00:00:00:00:00:00:05/metadata -d '{"lat": "33.0", "lng": "-84.0", "address": "Atlanta, USA", "iso3166_2_lvl4": "US-GA"}'
-curl -H 'Content-type: application/json' -X POST http://geant_london:8181/api/kytos/topology/v3/switches/00:00:00:00:00:00:00:06/metadata -d '{"lat": "51.0", "lng": "0.0", "address": "London, UK", "iso3166_2_lvl4": "GB-LND"}'
-curl -H 'Content-type: application/json' -X POST http://geant_france:8181/api/kytos/topology/v3/switches/00:00:00:00:00:00:00:07/metadata -d '{"lat": "48.0", "lng": "2.0", "address": "Paris, France", "iso3166_2_lvl4": "FR-IDF"}'
+curl -H 'Content-type: application/json' -X POST http://geant_london:8181/api/kytos/topology/v3/switches/00:00:00:00:00:00:00:06/metadata -d '{"lat": "51.0", "lng": "0.0", "address": "London, UK", "iso3166_2_lvl4": "GB-LD"}'
+curl -H 'Content-type: application/json' -X POST http://geant_france:8181/api/kytos/topology/v3/switches/00:00:00:00:00:00:00:07/metadata -d '{"lat": "48.0", "lng": "2.0", "address": "Paris, France", "iso3166_2_lvl4": "FR-IF"}'
 curl -H 'Content-type: application/json' -X POST http://lhc:8181/api/kytos/topology/v3/switches/00:00:00:00:00:00:00:08/metadata -d '{"lat": "46.0", "lng": "6.0", "address": "Geneva, Switzerland", "iso3166_2_lvl4": "CH-GE"}'
 
 #
@@ -78,3 +78,9 @@ curl -H 'Content-type: application/json' -X POST http://geant_london:8181/api/ky
 # net.addLink(lhc_s1, geant_france_s1, port1=19, port2=19)
 curl -H 'Content-type: application/json' -X POST http://lhc:8181/api/kytos/topology/v3/interfaces/00:00:00:00:00:00:00:08:19/metadata -d '{"sdx_nni": "france.geant.org:geantFRS1:19"}'
 curl -H 'Content-type: application/json' -X POST http://geant_france:8181/api/kytos/topology/v3/interfaces/00:00:00:00:00:00:00:07:19/metadata -d '{"sdx_nni": "lhc.cern:lhcS1:19"}'
+
+
+echo ""
+echo "Waiting 15s for links to come up and then send the topology to SDX-LC.."
+sleep 15
+for oxp in tenet amlight sax internet2 esnet geant_london geant_france lhc; do echo "==> $oxp"; curl -s -H 'Content-type: application/json' -X POST http://$oxp:8181/api/kytos/sdx/topology/2.0.0 | jq -r; done

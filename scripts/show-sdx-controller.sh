@@ -14,6 +14,12 @@ ports)
 	;;
 l2vpn)
 	curl -s http://$IP:8080/SDX-Controller/l2vpn/1.0 | jq -r '(["ID", "ENDPOINT-1", "VLAN-1", "ENDPOINT-2", "VLAN-2"] | (., map(length*"-"))), (.[]|[.service_id, .endpoints[0].port_id, .endpoints[0].vlan, .endpoints[1].port_id, .endpoints[1].vlan]) | @tsv' | column -t
+	if [ $# -eq 2 ]; then
+		echo ""
+		echo "Current Path:"
+		echo "-------------"
+		curl -s http://$IP:8080/SDX-Controller/l2vpn/1.0/$2 | jq -r '.[].current_path[]|.port_id + " " + .vlan' | column -t
+	fi
 	;;
 *)
 	echo "USAGE $0 nodes|ports|links"

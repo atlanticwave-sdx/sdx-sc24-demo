@@ -29,7 +29,7 @@ services:
       mongo:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -50,7 +50,7 @@ services:
       mongo:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -71,7 +71,7 @@ services:
       mongo:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -92,7 +92,7 @@ services:
       mongo:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -113,7 +113,7 @@ services:
       mongo:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -134,7 +134,7 @@ services:
       mongo:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -155,7 +155,7 @@ services:
       mongo:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -176,7 +176,7 @@ services:
       mongo:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -199,7 +199,7 @@ services:
       mq1:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -222,7 +222,7 @@ services:
       mq1:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -245,7 +245,7 @@ services:
       mq1:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -268,7 +268,7 @@ services:
       mq1:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -291,7 +291,7 @@ services:
       mq1:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -314,7 +314,7 @@ services:
       mq1:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -337,7 +337,7 @@ services:
       mq1:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -360,7 +360,7 @@ services:
       mq1:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -383,7 +383,7 @@ services:
       mq1:
         condition: service_healthy
     volumes:
-      - .:/sc24-demo
+      - ./scripts:/sc24-demo
     entrypoint:
       - "/bin/bash"
       - "-x"
@@ -400,11 +400,19 @@ services:
     privileged: true
     volumes:
       - ./topology.py:/topology.py
+      - ./scripts:/scripts
     entrypoint:
       - "/bin/bash"
       - "-x"
       - "-c"
       - |
         service openvswitch-switch start
-        tmux new-session -d -s mn python3 /topology.py
+        sleep 5
+        tmux new-session -d -s mn "sleep 2 && python3 /topology.py"
+        tmux pipe-pane -t mn "exec cat >>/var/log/mn-tmux.log"
+        sleep 5
+        pgrep -f "^python3 /topology.py" || exit 1
+        /scripts/wait-switches-connect.sh
+        sleep 3
+        /scripts/config-oxps.sh
         tail -f /dev/null
