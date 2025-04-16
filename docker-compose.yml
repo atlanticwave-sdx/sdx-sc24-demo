@@ -399,6 +399,7 @@ services:
     pull_policy: always
     privileged: true
     volumes:
+      - /lib/modules:/lib/modules      
       - ./topology.py:/topology.py
       - ./scripts:/scripts
     entrypoint:
